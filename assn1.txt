@@ -1,0 +1,20 @@
+Ioannis Boutsikas VR51416
+
+OS Name:                   Microsoft Windows 10 Pro
+OS Version:                10.0.17134 N/A Build 17134
+Processor:                 Intel i7-6700HQ
+GPU:					   NVIDIA GeForce GTX 960M
+UE4 Resolution:			   1920x1080 wf
+
+Baseline:
+	Mean: 11.244ms
+
+Computed:
+	Mean: 14.246ms
+	Mean difference from baseline: 3.002
+
+Baked:
+	Mean: 11.414ms
+	Mean difference from baseline: 0.17
+
+Video URL: https://drive.google.com/open?id=1TPN7TEhgQg0gid5pokDB_tcNbtiEaMay
