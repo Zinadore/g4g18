@@ -1,4 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+#pragma optimize("", off)
 
 #include "AMazeCell.h"
 #include "Components/StaticMeshComponent.h"
@@ -14,6 +15,7 @@ AMazeCell::AMazeCell()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRef(TEXT("/Engine/BasicShapes/Plane"));
 	StaticMesh = MeshRef.Object;
 	check(StaticMesh != nullptr);
+	
 
 	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialRef(TEXT("Material'/Game/WallMaterial.WallMaterial'"));
 	Material = MaterialRef.Object;
@@ -38,14 +40,16 @@ void AMazeCell::Tick(float DeltaTime)
 
 }
 
-void AMazeCell::EnableWall(Wall wall)
+void AMazeCell::EnableWall(Wall wall, int tileSize)
 {
-	auto m = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("Wall"), RF_Transactional);
-	m->RegisterComponent();
-	m->SetMobility(EComponentMobility::Movable);
-	m->AttachToComponent(RootComponent, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
+	auto m = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("Wall " + wall), RF_Transactional);
+	this->WallComponents[wall] = m;
+
 	m->SetStaticMesh(StaticMesh);
+	//m->SetMobility(EComponentMobility::Movable);
+	m->SetupAttachment(RootComponent);
 	m->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Material);
+	m->RegisterComponent();
 
 	m->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	m->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -53,25 +57,34 @@ void AMazeCell::EnableWall(Wall wall)
 
 	switch (wall) {
 		case Wall::North: {
-			m->SetRelativeLocation(FVector(50.0f, 0.0f, 50.0f));
+			m->SetRelativeLocation(FVector(tileSize / 2.0f, 0.0f, tileSize / 2.0f));
 			FQuat rot = FQuat::MakeFromEuler(FVector(90.0f, 0.0f, 90.0f));
 			m->AddRelativeRotation(rot);
 			break;
 		}
+		case Wall::East: {
+			m->SetRelativeLocation(FVector(0.0f, tileSize / 2.0f, tileSize / 2.0f));
+			FQuat rot = FQuat::MakeFromEuler(FVector(90.0f, 0.0f, 0.0f));
+			break;
+		}
+		case Wall::South: {
+			m->SetRelativeLocation(FVector(-tileSize / 2.0f, 0.0f, tileSize / 2.0f));
+			FQuat rot = FQuat::MakeFromEuler(FVector(90.0f, 0.0f, 90.0f));
+			break;
+		}
 		case Wall::West: {
-			m->SetRelativeLocation(FVector(0.0f, 50.0f, 50.0f));
-			FQuat rot = FQuat::MakeFromEuler(FVector((90.0f, 0.0f, 0.0f)));
+			m->SetRelativeLocation(FVector(0.0f, -tileSize / 2.0f, tileSize / 2.0f));
+			FQuat rot = FQuat::MakeFromEuler(FVector(90.0f, 0.0f, 0.0f));
 			m->AddRelativeRotation(rot);
 			break;
 		}
 	}
 
-	m->SetGenerateOverlapEvents(false);
+	/*m->SetGenerateOverlapEvents(false);
 	m->SetCanEverAffectNavigation(false);
 	m->bCastDynamicShadow = false;
 	m->bCastStaticShadow = false;
 	m->bAffectDistanceFieldLighting = false;
-	m->bAffectDynamicIndirectLighting = false;
+	m->bAffectDynamicIndirectLighting = false;*/
 
-	this->WallComponents[wall] = m;
 }

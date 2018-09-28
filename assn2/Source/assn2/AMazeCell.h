@@ -42,5 +42,5 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void EnableWall(Wall all);
+	void EnableWall(Wall all, int tileSize);
 };

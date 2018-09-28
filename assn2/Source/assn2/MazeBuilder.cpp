@@ -76,8 +76,16 @@ void AMazeBuilder::OnConstruction(const FTransform& transform)
 				auto c = GetWorld()->SpawnActor<AMazeCell>(location, rotation, spawnInfo);
 				this->cells[y * this->MazeWidth + x] = c;
 				c->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, true));
-				c->EnableWall(Wall::North);
-				//c->EnableWall(Wall::West);
+				c->EnableWall(Wall::North, this->TileSize);
+				c->EnableWall(Wall::West, this->TileSize);
+
+				if (x == this->MazeWidth - 1) {
+					c->EnableWall(Wall::East, this->TileSize);
+				}
+
+				if (y == this->MazeHeight - 1) {
+					c->EnableWall(Wall::South, this->TileSize);
+				}
 			}
 		}
 		this->numTiles = array_size;
