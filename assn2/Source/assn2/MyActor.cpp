@@ -26,27 +26,33 @@ AMyActor::AMyActor()
 	this->RootComponent = SceneComponent;
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("KeyMesh"));
-	StaticMeshComponent->SetMobility(EComponentMobility::Movable);
+	//StaticMeshComponent->SetMobility(EComponentMobility::Movable);
 	StaticMeshComponent->SetupAttachment(RootComponent);
 	StaticMeshComponent->SetStaticMesh(StaticMesh);
 	StaticMeshComponent->CreateAndSetMaterialInstanceDynamicFromMaterial(0, Material);
 
-	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	StaticMeshComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	//StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	//StaticMeshComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 
-	StaticMeshComponent->SetGenerateOverlapEvents(false);
-	StaticMeshComponent->SetCanEverAffectNavigation(false);
-	StaticMeshComponent->bCastDynamicShadow = false;
-	StaticMeshComponent->bCastStaticShadow = false;
-	StaticMeshComponent->bAffectDistanceFieldLighting = false;
-	StaticMeshComponent->bAffectDynamicIndirectLighting = false;
+	//StaticMeshComponent->SetGenerateOverlapEvents(false);
+	//StaticMeshComponent->SetCanEverAffectNavigation(false);
+	//StaticMeshComponent->bCastDynamicShadow = false;
+	//StaticMeshComponent->bCastStaticShadow = false;
+	//StaticMeshComponent->bAffectDistanceFieldLighting = false;
+	//StaticMeshComponent->bAffectDynamicIndirectLighting = false;
+
+	//auto tileSize = 100;
+	//StaticMeshComponent->SetRelativeLocation(FVector(0.0f, tileSize / 2.0f, tileSize / 2.0f));
+	//FQuat rot = FQuat::MakeFromEuler(FVector(90.0f, 0.0f, 0.0f));
+	//StaticMeshComponent->AddRelativeRotation(rot);
 }
 
 // Called when the game starts or when spawned
 void AMyActor::BeginPlay()
 {
 	Super::BeginPlay();
+	//StaticMeshComponent->SetStaticMesh(nullptr);	
 	
 }
 

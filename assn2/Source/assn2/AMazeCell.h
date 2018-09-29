@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Array.h"
 #include "AMazeCell.generated.h"
 
 class USceneComponent;
@@ -27,10 +28,17 @@ class ASSN2_API AMazeCell : public AActor
 
 private:
 	USceneComponent * SceneComponent;
-	UStaticMeshComponent* WallComponents[4];
 	UStaticMesh* StaticMesh;
 	UMaterial* Material;
 	
+public:
+	bool InMaze;
+	TArray<AMazeCell*> Neighbors;
+	TArray<UStaticMeshComponent*> WallComponents;
+
+	int x;
+	int y;
+
 public:	
 	// Sets default values for this actor's properties
 	AMazeCell();
@@ -43,4 +51,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void EnableWall(Wall all, int tileSize);
+	void DisableWall(Wall all);
+	void BuildNeighbors(int x, int y, int width, int height, TArray<AMazeCell*> cells);
+	void ConnectToFirstInNeighbor();
 };
