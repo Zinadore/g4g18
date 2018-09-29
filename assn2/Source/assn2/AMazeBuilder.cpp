@@ -81,6 +81,7 @@ void AMazeBuilder::KnockDemWallsDown()
 
 void AMazeBuilder::BuildMaze(bool force)
 {
+	// This check is primarily for the Editor's shake, so it won't keep rebuilding the array for every change.
 	bool shouldRebuild = this->oldWidth != this->MazeWidth ||
 		this->oldHeight != this->MazeHeight ||
 		this->oldTileSize != this->TileSize ||
@@ -103,8 +104,6 @@ void AMazeBuilder::BuildMaze(bool force)
 
 		FRotator rotation(0.0f, 0.0f, 0.0f);
 		FActorSpawnParameters spawnInfo;
-		//spawnInfo.Owner = this;
-		//spawnInfo.bDeferConstruction = false;
 
 		for (int y = 0; y < this->MazeWidth; y++) {
 			for (int x = 0; x < this->MazeHeight; x++) {
@@ -151,13 +150,6 @@ void AMazeBuilder::Destroyed() {
 void AMazeBuilder::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	//for (int i = 0; i < cells.Num(); ++i) {
-	//	auto w = cells[i];
-
-	//	if (w != nullptr) {
-	//		w->Destroy();
-	//	}
-	//}
 	BuildMaze(true);
 }
 

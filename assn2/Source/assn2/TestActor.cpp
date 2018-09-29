@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+#pragma optimize("", off)
 #include "TestActor.h"
 
 
@@ -35,8 +35,7 @@ void ATestActor::BeginPlay()
 	}
 
 	cells[0]->DisableWall(Wall::East);
-	cells[1]->DisableWall(Wall::West);
-	
+	cells[1]->DisableWall(Wall::West);	
 }
 
 // Called every frame

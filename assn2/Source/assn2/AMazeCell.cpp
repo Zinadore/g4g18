@@ -146,7 +146,7 @@ void AMazeCell::ConnectToFirstInNeighbor()
 				this->DisableWall(Wall::West);
 				n->DisableWall(Wall::East);
 			}
+			break;
 		}
-		break;
 	}
 }
