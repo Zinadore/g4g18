@@ -23,7 +23,18 @@ AMazeCell::AMazeCell()
 	SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"), true);
 	check(SceneComponent != nullptr);
 	this->RootComponent = SceneComponent;
-	this->WallComponents.SetNum(4);
+	this->WallComponents.SetNum(5);
+
+	static ConstructorHelpers::FObjectFinder<UMaterial> FloorMaterialRef(TEXT("Material'/Game/FloorMaterial.FloorMaterial'"));
+	auto FloorMaterial = FloorMaterialRef.Object;
+	check(FloorMaterial != nullptr);
+
+	auto f = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
+	f->SetStaticMesh(StaticMesh);
+	f->SetupAttachment(RootComponent);
+	f->CreateAndSetMaterialInstanceDynamicFromMaterial(0, FloorMaterial);
+	//f->RegisterComponent();
+	WallComponents[Wall::Floor] = f;
 }
 
 // Called when the game starts or when spawned

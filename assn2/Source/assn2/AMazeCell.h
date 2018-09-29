@@ -15,10 +15,11 @@ class UMaterial;
 UENUM()
 enum Wall
 {
-	North = 0 UMETA(DisplayName = "North Wall"),
-	East = 1 UMETA(DisplayName = "East Wall"),
-	South = 2 UMETA(DisplayName = "South Wall"),
-	West = 3 UMETA(DisplayName = "West Wall")
+	North	= 0 UMETA(DisplayName = "North Wall"),
+	East	= 1 UMETA(DisplayName = "East Wall"),
+	South	= 2 UMETA(DisplayName = "South Wall"),
+	West	= 3 UMETA(DisplayName = "West Wall"),
+	Floor	= 4 UMETA(DisplayName = "Floor")
 };
 
 UCLASS()
