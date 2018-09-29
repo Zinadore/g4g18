@@ -83,13 +83,16 @@ void AMazeCell::EnableWall(Wall wall, int tileSize)
 		}
 	}
 }
-
+/**
+* Will disable the wall specified. If the wall was not enabled to begin with, it does nothing
+*
+* @param Wall type to destroy.
+*/
 void AMazeCell::DisableWall(Wall wall) {
 	auto w = WallComponents[wall];
 
 	if (w!= nullptr) {
 		w->SetStaticMesh(0);
-		//w->UnregisterComponent();
 	}
 }
 
@@ -98,22 +101,25 @@ void AMazeCell::BuildNeighbors(int x, int y, int width, int height, TArray<AMaze
 	this->x = x;
 	this->y = y;
 
+	//Add the cell above us to the neighbor list, if applicable
 	auto north_x = x + 1;
 	if (north_x < height) {
 		this->Neighbors.Add(cells[y * height + north_x]);
 	}
 
+	//Add the cell to the right of us to the neighbor list, if applicable
 	auto east_y = y + 1;
-
 	if (east_y < width) {
 		this->Neighbors.Add(cells[east_y * height + x]);
 	}
 
+	//Add the cell below us to the neighbor list, if applicable
 	auto south_x = x - 1;
 	if (south_x >= 0) {
 		this->Neighbors.Add(cells[y * height + south_x]);
 	}
 
+	//Add the cell to the left of us to the neighbor list, if applicable
 	auto west_y = y - 1;
 	if (west_y >= 0) {
 		this->Neighbors.Add(cells[west_y * height + x]);

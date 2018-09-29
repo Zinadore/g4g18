@@ -21,9 +21,11 @@ private:
 	int32 oldTileSize = 0;
 	int32 oldWidth = 0;
 	int32 oldHeight = 0;
-	TArray<AMazeCell*> cells;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Settings")
+	TArray<AMazeCell*> cells;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Maze Settings")
 		int MazeWidth = 2;
 
