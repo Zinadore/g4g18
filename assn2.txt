@@ -1,0 +1,8 @@
+Ioannis Boutsikas VR51416
+
+
+
+Everything requested works. Collision is turned on for the walls and floor so flying through them
+will not work.
+
+Video URL: https://drive.google.com/open?id=1Fq6LrrXS4POceBiqxZ4pibE2FUsYZgye
