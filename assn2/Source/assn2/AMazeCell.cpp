@@ -59,7 +59,9 @@ void AMazeCell::EnableWall(Wall wall, int tileSize)
 		return;
 	}
 
-	auto m = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("Wall " + wall), RF_Transactional);
+	auto parentName = GetFName().ToString();
+	auto name = FString::Printf(TEXT("%s Wall %d"), *parentName, wall);
+	auto m = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), FName(*name), RF_Transactional);
 	this->WallComponents[wall] = m;
 
 	m->SetStaticMesh(StaticMesh);

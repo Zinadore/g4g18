@@ -110,6 +110,7 @@ void AMazeBuilder::BuildMaze(bool force)
 
 		FRotator rotation(0.0f, 0.0f, 0.0f);
 		FActorSpawnParameters spawnInfo;
+		spawnInfo.Owner = this;
 
 		for (int y = 0; y < this->MazeWidth; y++) {
 			for (int x = 0; x < this->MazeHeight; x++) {
@@ -160,9 +161,9 @@ void AMazeBuilder::PostInitializeComponents()
 
 	// This is required since for some reason we are losing all the references to the actors spawned from OnConstruction
 	// It is some weird side-effect of how UE4 serializes properties from editor to play and the whole actor cloning thing
-	for (TActorIterator<AMazeCell> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
-		ActorItr->Destroy();
-	}
+	//for (TActorIterator<AMazeCell> ActorItr(GetWorld()); ActorItr; ++ActorItr) {
+	//	ActorItr->Destroy();
+	//}
 	BuildMaze(true);
 }
 
