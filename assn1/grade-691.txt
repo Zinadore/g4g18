@@ -1,0 +1,42 @@
+CMSC 691 / Graphics for Games
+Assignment 1 Grading Rubric
+
+25/25 - Basics
+    5/5 - Forked github repository
+    5/5 - Created assn1 project and map
+    5/5 - Necessary files checked in (uproject, Config/, Content/)
+    5/5 - Transient files not checked in (including Binaries/,
+         DerivedDataCache/, Intermediate/, Saved/, etc.)
+    5/5 - Multiple checkins during development
+18/18 - Computed Material
+    2/2 - Created a Material
+    2/2 - Applied to a plane
+    2/2 - Plane is labeled
+    4/4 - Material includes at least two Noise nodes
+    2/2 - Expression using TexCoord is used as input to Noise
+    4/4 - Noise nodes are combined in some way (+, *, lerp, ...)
+    2/2 - Output is connected to Emissive and/or material is set to Unlit
+18/18 - Render Target / Bake
+    4/4 - Created a Render Target
+    4/4 - Created a blueprint
+    5/5 - Blueprint uses DrawMaterialToRenderTarget (Canvas functions OK too)
+    5/5 - Render target filled-in on play
+18/18 - Baked Material
+    2/2 - Created a Material
+    2/2 - Applied to a plane
+    2/2 - Plane is labeled
+    4/4 - Material uses TextureSample node with RenderTarget
+    4/4 - Output is connected to Emissive and/or material is set to Unlit
+    4/4 - Texture Material looks identical to Computed Material
+6/6  - Keyboard Control
+    2/2 - Key events enabled in blueprint
+    2/2 - Event triggers for "1", "2", and "3"
+    2/2 - Keyboard events change material
+15/15 - Results
+    5/5 - assn1.txt file checked in with name, ID, and computer config
+    5/5 - Timings reported in assn1.txt
+    5/5 - Include link to video file demonstrating project
+----
+100/100 - Total
+
+
