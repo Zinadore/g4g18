@@ -1,0 +1,9 @@
+Ioannis Boutsikas VR51416
+
+There is no Data Structure in place to speed up distance queries.
+The function that returns a point adds it to the array of existing points, I assume that that counts as changing state, so i tried marking the function
+as BluprintCallable. However, that meant that the function was never called so i just changed it to BlueprintPure and it worked. No idea why or how to fix that.
+
+All of the relevant code exists inside assn3_bluenoiseBPLibrary.h/.cpp
+
+Video URL: https://drive.google.com/open?id=1hodUetGL37x2X0H5aIsjnaB2dImwXaJb

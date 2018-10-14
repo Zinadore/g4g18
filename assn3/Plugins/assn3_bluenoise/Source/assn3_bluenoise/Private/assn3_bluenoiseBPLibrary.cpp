@@ -13,7 +13,6 @@ void Uassn3_bluenoiseBPLibrary::InitializeContainer(FBluenoiseContainer& Contain
 	Container.Initialize(Seed);
 }
 
-#pragma optimize("", off)
 FVector Uassn3_bluenoiseBPLibrary::GetPoint(UPARAM(ref)FBluenoiseContainer & Container, float Min, float Max)
 {
 	FVector new_point;
@@ -56,4 +55,3 @@ FVector Uassn3_bluenoiseBPLibrary::GetPoint(UPARAM(ref)FBluenoiseContainer & Con
 	Container.m_ExistingPoints.Add(new_point);
 	return new_point;
 }
-#pragma optimize("", on)
