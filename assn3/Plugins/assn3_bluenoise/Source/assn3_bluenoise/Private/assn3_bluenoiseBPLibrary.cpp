@@ -1,5 +1,5 @@
-#include "assn3_bluenoise.h"
 #include "assn3_bluenoiseBPLibrary.h"
+#include "assn3_bluenoise.h"
 #define CANDITATES_BASE_MULTIPLIER 1
 
 Uassn3_bluenoiseBPLibrary::Uassn3_bluenoiseBPLibrary(const FObjectInitializer& ObjectInitializer)

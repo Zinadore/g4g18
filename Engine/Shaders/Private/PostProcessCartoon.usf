@@ -1,0 +1,32 @@
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
+
+/*=============================================================================
+	FXAAShader.usf : Postprocess Anti aliasing based on FXAA code from NVIDIA
+=============================================================================*/
+
+#include "Common.ush"
+#include "PostProcessCommon.ush"
+
+/*-----------------------------------------------------------------------------
+	FXAA vertex shader
+-----------------------------------------------------------------------------*/
+void PPCartoonVS(
+	in float4 InPosition : ATTRIBUTE0,
+	in float2 UV : ATTRIBUTE1,
+	out float4 OutPosition : SV_POSITION
+	)
+{
+	OutPosition = InPosition;
+}
+
+
+/*-----------------------------------------------------------------------------
+	FXAA pixel shader
+-----------------------------------------------------------------------------*/
+#if PIXELSHADER
+	void PPCartoonPS(out float4 OutColor : SV_Target0)
+	{
+		OutColor = float4(1, 0, 1, 1);
+	}
+
+#endif // PIXELSHADER

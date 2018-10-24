@@ -55,6 +55,8 @@
 #include "PostProcess/PostProcessFFTBloom.h"
 #include "MobileSeparateTranslucencyPass.h"
 
+#include "PostProcess/PostProcessCartoon.h"
+
 /** The global center for all post processing activities. */
 FPostProcessing GPostProcessing;
 
@@ -1350,7 +1352,7 @@ void FPostProcessing::RegisterHMDPostprocessPass(FPostprocessContext& Context, c
 		}
 	}
 }
-
+#pragma optimize("", off)
 void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewInfo& View, TRefCountPtr<IPooledRenderTarget>& VelocityRT)
 {
 	QUICK_SCOPE_CYCLE_COUNTER( STAT_PostProcessing_Process );
@@ -1410,6 +1412,18 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 		//
 		FSceneViewState* ViewState = (FSceneViewState*)Context.View.State;
 
+		// Cartoon pass scope
+		{
+			static const auto EnableCartoonPass = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.CartoonPass"));
+
+			if (EnableCartoonPass->GetValueOnRenderThread() != 0) {
+				auto CartoonPass = Context.Graph.RegisterPass(new(FMemStack::Get()) FRCPassPostProcessCartoon());
+				CartoonPass->SetInput(ePId_Input0, Context.FinalOutput);
+				CartoonPass->SetInput(ePId_Input1, FRenderingCompositeOutputRef(Context.SceneDepth));
+				Context.FinalOutput = FRenderingCompositeOutputRef(CartoonPass);
+			}
+		}
+
 		{
 			if (FSceneRenderTargets::Get(RHICmdList).SeparateTranslucencyRT)
 			{
@@ -1456,6 +1470,7 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 			}
 
 			Context.FinalOutput = AddPostProcessMaterialChain(Context, BL_BeforeTranslucency, SeparateTranslucency);
+
 
 			static const auto CVar = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.DepthOfFieldQuality"));
 			check(CVar)
@@ -2237,6 +2252,7 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 
 	GRenderTargetPool.AddPhaseEvent(TEXT("AfterPostprocessing"));
 }
+#pragma optimize("", on)
 
 static bool IsGaussianActive(FPostprocessContext& Context)
 {
