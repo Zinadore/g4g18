@@ -6,17 +6,20 @@
 
 #include "Common.ush"
 #include "PostProcessCommon.ush"
+#include "DeferredShadingCommon.ush"
 
 /*-----------------------------------------------------------------------------
 	FXAA vertex shader
 -----------------------------------------------------------------------------*/
 void PPCartoonVS(
 	in float4 InPosition : ATTRIBUTE0,
-	in float2 UV : ATTRIBUTE1,
+	in float2 InTexCoord : ATTRIBUTE1,
+	out noperspective float4 OutTexCoord : TEXCOORD0,
 	out float4 OutPosition : SV_POSITION
 	)
 {
-	OutPosition = InPosition;
+	DrawRectangle(InPosition, InTexCoord, OutPosition, OutTexCoord.xy);
+	OutTexCoord.zw = OutPosition.xy;
 }
 
 
@@ -24,9 +27,28 @@ void PPCartoonVS(
 	FXAA pixel shader
 -----------------------------------------------------------------------------*/
 #if PIXELSHADER
-	void PPCartoonPS(out float4 OutColor : SV_Target0)
+	void PPCartoonPS(
+		out float4 OutColor : SV_Target0,
+		in float4 InTexCoord: TEXCOORD0
+	)
 	{
-		OutColor = float4(1, 0, 1, 1);
+		float4 sceneColor = Texture2DSample(PostprocessInput0, PostprocessInput0Sampler, InTexCoord.xy);
+
+		float magicResult = RGBToYCoCg(sceneColor.xyz);
+
+		float newLuminance = round(magicResult.x / 0.1);
+
+		magicResult.x = newLuminance;
+
+
+		float magicUnResult = YCoCgToRGB(magicResult);
+
+
+
+
+
+		OutColor = sceneColor * newLuminance;
+		// OutColor = float4(1, 0, 0.8, 1);
 	}
 
 #endif // PIXELSHADER

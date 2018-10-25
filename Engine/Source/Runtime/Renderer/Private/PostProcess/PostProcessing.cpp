@@ -1352,7 +1352,7 @@ void FPostProcessing::RegisterHMDPostprocessPass(FPostprocessContext& Context, c
 		}
 	}
 }
-#pragma optimize("", off)
+
 void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewInfo& View, TRefCountPtr<IPooledRenderTarget>& VelocityRT)
 {
 	QUICK_SCOPE_CYCLE_COUNTER( STAT_PostProcessing_Process );
@@ -2252,7 +2252,7 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 
 	GRenderTargetPool.AddPhaseEvent(TEXT("AfterPostprocessing"));
 }
-#pragma optimize("", on)
+
 
 static bool IsGaussianActive(FPostprocessContext& Context)
 {

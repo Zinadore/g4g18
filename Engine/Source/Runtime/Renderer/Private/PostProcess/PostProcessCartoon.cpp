@@ -19,6 +19,29 @@ class FPostProcessCartoonVS : public FGlobalShader {
 	{
 	}
 
+	void SetParameters(const FRenderingCompositePassContext& Context)
+	{
+		const FVertexShaderRHIParamRef ShaderRHI = GetVertexShader();
+
+		FGlobalShader::SetParameters<FViewUniformShaderParameters>(Context.RHICmdList, ShaderRHI, Context.View.ViewUniformBuffer);
+
+		const FPooledRenderTargetDesc* SceneColor = Context.Pass->GetInputDesc(ePId_Input0);
+
+		if (!SceneColor)
+		{
+			// input is not hooked up correctly
+			return;
+		}
+
+		const FPooledRenderTargetDesc* SceneDepth = Context.Pass->GetInputDesc(ePId_Input1);
+
+		if (!SceneDepth)
+		{
+			// input is not hooked up correctly
+			return;
+		}
+	}
+
 	static bool ShouldCache(EShaderPlatform Platform)
 	{
 		return true;
@@ -58,29 +81,21 @@ IMPLEMENT_SHADER_TYPE(, FPostProcessCartoonVS, TEXT("/Engine/Private/PostProcess
 	FPostProcessCartoonPS(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
  		: FGlobalShader(Initializer)
  	{
-
+		PostprocessParameter.Bind(Initializer.ParameterMap);
  	}
 
- 	// FShader interface.
- 	virtual bool Serialize(FArchive& Ar) override
- 	{
- 		bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
- 		Ar << PostprocessParameter;
- 		return bShaderHasOutdatedParameters;
- 	}
+	template <typename TRHICmdList>
+	void SetParameters(TRHICmdList& RHICmdList, const FRenderingCompositePassContext& Context)
+	{
+		const FPixelShaderRHIParamRef ShaderRHI = GetPixelShader();
 
- 	template <typename TRHICmdList>
- 	void SetParameters(TRHICmdList& RHICmdList, const FRenderingCompositePassContext& Context)
- 	{
- 		const FPixelShaderRHIParamRef ShaderRHI = GetPixelShader();
+		const FViewInfo& View = Context.View;
 
- 		const FViewInfo& View = Context.View;
+		FGlobalShader::SetParameters<FViewUniformShaderParameters>(RHICmdList, ShaderRHI, View.ViewUniformBuffer);
 
- 		FGlobalShader::SetParameters<FViewUniformShaderParameters>(RHICmdList, ShaderRHI, View.ViewUniformBuffer);
+		PostprocessParameter.SetPS(RHICmdList, ShaderRHI, Context, TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
 
- 		PostprocessParameter.SetPS(RHICmdList, ShaderRHI, Context, TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
-
-		const FPooledRenderTargetDesc* SceneColor = GetInputDesc(ePId_Input0);
+		const FPooledRenderTargetDesc* SceneColor = Context.Pass->GetInputDesc(ePId_Input0);
 
 		if (!SceneColor)
 		{
@@ -88,12 +103,21 @@ IMPLEMENT_SHADER_TYPE(, FPostProcessCartoonVS, TEXT("/Engine/Private/PostProcess
 			return;
 		}
 
-		const FPooledRenderTargetDesc* SceneDepth = GetInputDesc(ePId_Input1);
+		const FPooledRenderTargetDesc* SceneDepth = Context.Pass->GetInputDesc(ePId_Input1);
 
-		if (!SceneDepth) {
+		if (!SceneDepth)
+		{
+			// input is not hooked up correctly
 			return;
 		}
+	}
 
+ 	// FShader interface.
+ 	virtual bool Serialize(FArchive& Ar) override
+ 	{
+ 		bool bShaderHasOutdatedParameters = FGlobalShader::Serialize(Ar);
+ 		Ar << PostprocessParameter;
+ 		return bShaderHasOutdatedParameters;
  	}
 
  	static const TCHAR* GetSourceFilename()
@@ -169,8 +193,8 @@ void FRCPassPostProcessCartoon::Process(FRenderingCompositePassContext& Context)
 
 	SetGraphicsPipelineState(Context.RHICmdList, GraphicsPSOInit);
 
-	//PixelShader->SetParameters(Context);
-	//VertexShader->SetParameters(Context);
+	PixelShader->SetParameters(Context.RHICmdList, Context);
+	VertexShader->SetParameters(Context);
 
 	DrawPostProcessPass(Context.RHICmdList,
 		DestRect.Min.X, DestRect.Min.Y,
