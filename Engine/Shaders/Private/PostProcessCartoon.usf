@@ -23,32 +23,49 @@ void PPCartoonVS(
 }
 
 
+float EdgeForSide(float4 CurrentSample, float2 SampleUV) {
+	return Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, SampleUV).r;
+}
+
 /*-----------------------------------------------------------------------------
 	FXAA pixel shader
 -----------------------------------------------------------------------------*/
 #if PIXELSHADER
+
 	void PPCartoonPS(
-		out float4 OutColor : SV_Target0,
-		in float4 InTexCoord: TEXCOORD0
+		in noperspective float4 UVAndScreenPos: TEXCOORD0,
+		out float4 OutColor : SV_Target0
 	)
 	{
-		float4 sceneColor = Texture2DSample(PostprocessInput0, PostprocessInput0Sampler, InTexCoord.xy);
+		float2 UV = UVAndScreenPos.xy;
 
-		float magicResult = RGBToYCoCg(sceneColor.xyz);
+		// FScreenSpaceData ScreenSpaceData = GetScreenSpaceData(UV, false);
+		// FGBufferData GBuffer = ScreenSpaceData.GBuffer;
+		float currentSample = Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, UV).r;
 
-		float newLuminance = round(magicResult.x / 0.1);
+		// Right pixel
+		float rightSample = EdgeForSide(currentSample, UV + float2(PostprocessInput1Size.z, 0));
 
-		magicResult.x = newLuminance;
+		// Left pixel
+		float leftSample = EdgeForSide(currentSample, UV + float2(-PostprocessInput1Size.z, 0));
+
+		// Top pixel
+		float topSample = EdgeForSide(currentSample, UV + float2(0, -PostprocessInput1Size.w));
+
+		// Bottom pixel
+		float bottomSample = EdgeForSide(currentSample, UV + float2(0, PostprocessInput1Size.w));
+
+		float rightEdge = currentSample - rightSample;
+		float leftEdge = currentSample - leftSample;
+		float topEdge = currentSample - topSample;
+		float bottomEdge = currentSample - bottomSample;
 
 
-		float magicUnResult = YCoCgToRGB(magicResult);
+		OutColor = float4(rightEdge, rightEdge, rightEdge, 1) +
+				   float4(leftEdge, leftEdge, leftEdge, 1) +
+				   float4(topEdge, topEdge, topEdge, 1) +
+				   float4(bottomEdge, bottomEdge, bottomEdge, 1);
 
-
-
-
-
-		OutColor = sceneColor * newLuminance;
-		// OutColor = float4(1, 0, 0.8, 1);
 	}
 
 #endif // PIXELSHADER
