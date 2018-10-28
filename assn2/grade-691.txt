@@ -1,0 +1,38 @@
+CMSC 691 / Graphics for Games
+Assignment 2 Grading Rubric
+
+25/25 - Basics
+    5/5 - Created assn2 project and map
+    5/5 - Necessary files checked in (uproject, Config/, Content/)
+    5/5 - Transient files not checked in (including Binaries/,
+         DerivedDataCache/, Intermediate/, Saved/, etc.)
+    5/5 - Multiple checkins during development
+    5/5 - Did not use github web upload
+7/7 - C++ Actor
+    4/4 - Created a C++ actor
+    3/3 - Create USceneComponent as RootComponent
+28/28 - Wall grid
+    4/4 - Create array(s) of UStaticMeshComponents
+    4/4 - Load plane mesh in code
+    4/4 - Add plane mesh to UStaticMeshComponents
+    4/4 - Created a 2-sided material
+    4/4 - Loaded material in code
+    4/4 - Set UStaticMeshComponent material
+    4/4 - Position planes into grid
+10/10 - Build Maze
+    5/5 - Maze algorithm implemented correctly
+    5/5 - Removes walls as required
+15/15 - Results
+    5/5 - assn2.txt file committed
+    5/5 - Relevant comments in assn2.txt
+    5/5 - Include link to video file demonstrating project
+15/15 - Grad component
+    5/5 - Editable size in actor header
+    5/5 - Dynamic arrays as necessary
+    5/5 - Changes to support building outside of constructor 
+        e.g. moving code to OnConstruction or BeginPlay instead of constructor
+        Preallocating, or using NewObject instead of CreateDefaultSubobject 
+----
+100/100 - Total
+
+
