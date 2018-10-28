@@ -1412,17 +1412,7 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 		//
 		FSceneViewState* ViewState = (FSceneViewState*)Context.View.State;
 
-		// Cartoon pass scope
-		{
-			static const auto EnableCartoonPass = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.CartoonPass"));
-
-			if (EnableCartoonPass->GetValueOnRenderThread() != 0) {
-				auto CartoonPass = Context.Graph.RegisterPass(new(FMemStack::Get()) FRCPassPostProcessCartoon());
-				CartoonPass->SetInput(ePId_Input0, Context.FinalOutput);
-				CartoonPass->SetInput(ePId_Input1, FRenderingCompositeOutputRef(Context.SceneDepth));
-				Context.FinalOutput = FRenderingCompositeOutputRef(CartoonPass);
-			}
-		}
+		
 
 		{
 			if (FSceneRenderTargets::Get(RHICmdList).SeparateTranslucencyRT)
@@ -1458,6 +1448,19 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 		FRCPassPostProcessTonemap* Tonemapper = 0;
 
 		FRenderingCompositeOutputRef SSRInputChain;
+
+		FRenderingCompositePass* CachedDepth = Context.SceneDepth;
+		// Cartoon pass scope
+		/*{
+			static const auto EnableCartoonPass = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.CartoonPass"));
+
+			if (EnableCartoonPass->GetValueOnRenderThread() != 0) {
+				auto CartoonPass = Context.Graph.RegisterPass(new(FMemStack::Get()) FRCPassPostProcessCartoon(Context.RHICmdList));
+				CartoonPass->SetInput(ePId_Input0, Context.FinalOutput);
+				CartoonPass->SetInput(ePId_Input1, FRenderingCompositeOutputRef(Context.SceneDepth));
+				Context.FinalOutput = FRenderingCompositeOutputRef(CartoonPass);
+			}
+		}*/
 
 		// add the passes we want to add to the graph (commenting a line means the pass is not inserted into the graph) ---------
 
@@ -1574,6 +1577,7 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 			const EPixelFormat SceneColorHalfResFormat = PF_FloatRGB;
 
 			if( AntiAliasingMethod == AAM_TemporalAA && ViewState)
+
 			{
 				FTAAPassParameters Parameters = MakeTAAPassParametersForView(Context.View);
 
@@ -1675,6 +1679,19 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 
 				Context.FinalOutput = FRenderingCompositeOutputRef(VisualizePass);
 			}
+
+			// Add Cartoon Here
+			{
+				static const auto EnableCartoonPass = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.CartoonPass"));
+
+				if (EnableCartoonPass->GetValueOnRenderThread() != 0) {
+				auto CartoonPass = Context.Graph.RegisterPass(new(FMemStack::Get()) FRCPassPostProcessCartoon(Context.RHICmdList));
+				CartoonPass->SetInput(ePId_Input0, Context.FinalOutput);
+				CartoonPass->SetInput(ePId_Input1, FRenderingCompositeOutputRef(CachedDepth));
+				Context.FinalOutput = FRenderingCompositeOutputRef(CartoonPass);
+				}
+			}
+
 
 			if(bVisualizeBloom)
 			{
@@ -1943,6 +1960,18 @@ void FPostProcessing::Process(FRHICommandListImmediate& RHICmdList, const FViewI
 				AddGammaOnlyTonemapper(Context);
 			}
 		}
+
+		// Cartoon pass scope
+		/*{
+			static const auto EnableCartoonPass = IConsoleManager::Get().FindTConsoleVariableDataInt(TEXT("r.CartoonPass"));
+
+			if (EnableCartoonPass->GetValueOnRenderThread() != 0) {
+				auto CartoonPass = Context.Graph.RegisterPass(new(FMemStack::Get()) FRCPassPostProcessCartoon(Context.RHICmdList));
+				CartoonPass->SetInput(ePId_Input0, Context.FinalOutput);
+				CartoonPass->SetInput(ePId_Input1, FRenderingCompositeOutputRef(CachedDepth));
+				Context.FinalOutput = FRenderingCompositeOutputRef(CartoonPass);
+			}
+		}*/
 		
 		// Whether Context.FinalOutput is already unscaled.
 		// If doing temporal upsampling, the final output is already unscaled in TAA pass.

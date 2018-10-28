@@ -12,9 +12,7 @@
 class FRCPassPostProcessCartoon : public TRenderingCompositePassBase<2, 1>
 {
 public:
-	FRCPassPostProcessCartoon()
-	{
-	}
+	FRCPassPostProcessCartoon(FRHICommandList& RHICmdList);
 
 
 	// interface FRenderingCompositePass ---------

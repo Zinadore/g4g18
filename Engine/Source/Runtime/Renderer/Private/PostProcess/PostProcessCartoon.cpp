@@ -1,7 +1,7 @@
 /*=============================================================================
 	PostProcessCartoon.cpp: Post processing cartoon effect implementation.
 =============================================================================*/
-
+#pragma optimize("", off)
 #include "PostProcess/PostProcessCartoon.h"
  #include "StaticBoundShaderState.h"
  #include "SceneUtils.h"
@@ -72,16 +72,19 @@ IMPLEMENT_SHADER_TYPE(, FPostProcessCartoonVS, TEXT("/Engine/Private/PostProcess
  	}
 
  	/** Default constructor. */
-	FPostProcessCartoonPS() {}
+	FPostProcessCartoonPS() {
+	}
 
  public:
- 	FPostProcessPassParameters PostprocessParameter;
+	 FPostProcessPassParameters PostprocessParameter;
+	 FSceneTextureShaderParameters SceneTextureParameters;
 
  	/** Initialization constructor. */
 	FPostProcessCartoonPS(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
  		: FGlobalShader(Initializer)
  	{
 		PostprocessParameter.Bind(Initializer.ParameterMap);
+		SceneTextureParameters.Bind(Initializer);
  	}
 
 	template <typename TRHICmdList>
@@ -91,9 +94,9 @@ IMPLEMENT_SHADER_TYPE(, FPostProcessCartoonVS, TEXT("/Engine/Private/PostProcess
 
 		const FViewInfo& View = Context.View;
 
-		FGlobalShader::SetParameters<FViewUniformShaderParameters>(RHICmdList, ShaderRHI, View.ViewUniformBuffer);
-
-		PostprocessParameter.SetPS(RHICmdList, ShaderRHI, Context, TStaticSamplerState<SF_Bilinear, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+		FGlobalShader::SetParameters<FViewUniformShaderParameters>(RHICmdList, ShaderRHI, Context.View.ViewUniformBuffer);
+		PostprocessParameter.SetPS(RHICmdList, ShaderRHI, Context, TStaticSamplerState<SF_Point, AM_Clamp, AM_Clamp, AM_Clamp>::GetRHI());
+		SceneTextureParameters.Set(RHICmdList, ShaderRHI, Context.View.FeatureLevel, ESceneTextureSetupMode::All);
 
 		const FPooledRenderTargetDesc* SceneColor = Context.Pass->GetInputDesc(ePId_Input0);
 
@@ -140,6 +143,10 @@ static TAutoConsoleVariable<int32> CVarCartoonEffect(
 	TEXT("1 = Enable\n")
 	TEXT("0 = Disable\n"),
 	ECVF_RenderThreadSafe);
+
+FRCPassPostProcessCartoon::FRCPassPostProcessCartoon(FRHICommandList& RHICmdList) {
+	FSceneRenderTargets::Get(RHICmdList).AdjustGBufferRefCount(RHICmdList, 1);
+}
 
 void FRCPassPostProcessCartoon::Process(FRenderingCompositePassContext& Context)
 {
@@ -193,8 +200,8 @@ void FRCPassPostProcessCartoon::Process(FRenderingCompositePassContext& Context)
 
 	SetGraphicsPipelineState(Context.RHICmdList, GraphicsPSOInit);
 
-	PixelShader->SetParameters(Context.RHICmdList, Context);
 	VertexShader->SetParameters(Context);
+	PixelShader->SetParameters(Context.RHICmdList, Context);
 
 	DrawPostProcessPass(Context.RHICmdList,
 		DestRect.Min.X, DestRect.Min.Y,
@@ -209,6 +216,7 @@ void FRCPassPostProcessCartoon::Process(FRenderingCompositePassContext& Context)
 		EDRF_Default);
 
 	Context.RHICmdList.CopyToResolveTarget(DestRenderTarget.TargetableTexture, DestRenderTarget.ShaderResourceTexture, FResolveParams());
+	FSceneRenderTargets::Get(Context.RHICmdList).AdjustGBufferRefCount(Context.RHICmdList, -1);
 }
 
 FPooledRenderTargetDesc FRCPassPostProcessCartoon::ComputeOutputDesc(EPassOutputId InPassOutputId) const

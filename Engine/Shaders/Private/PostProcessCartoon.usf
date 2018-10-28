@@ -23,14 +23,81 @@ void PPCartoonVS(
 }
 
 
-float EdgeForSide(float4 CurrentSample, float2 SampleUV) {
-	return Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, SampleUV).r;
-}
+
 
 /*-----------------------------------------------------------------------------
 	FXAA pixel shader
 -----------------------------------------------------------------------------*/
 #if PIXELSHADER
+	float DepthEdgeForUV(float2 UV) {
+		return Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, UV).r;
+	}
+
+	float3 NormalEdgeForUV(float2 UV) {
+		// GBufferA.rgb = WorldNormal of that pixel
+		float4 GBufferA = Texture2DSampleLevel(SceneTexturesStruct.GBufferATexture, SceneTexturesStruct.GBufferATextureSampler, UV, 0);
+		float3 normal = GBufferA.xyz;
+		normal = DecodeNormal(GBufferA.xyz);
+		normal = normalize(normal);
+		return normal;
+	}
+
+	float CalculateDepthLine(float2 UV) {
+		float gy = (
+						DepthEdgeForUV(UV + float2(-PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * DepthEdgeForUV(UV + float2(0, -PostprocessInput1Size.w)) +
+						DepthEdgeForUV(UV + float2(PostprocessInput1Size.z, -PostprocessInput1Size.w))
+					) -
+					(
+						DepthEdgeForUV(UV + float2(-PostprocessInput1Size.z, PostprocessInput1Size.w)) +
+						2 * DepthEdgeForUV(UV + float2(0, +PostprocessInput1Size.w)) +
+						DepthEdgeForUV(UV + float2(PostprocessInput1Size.z, +PostprocessInput1Size.w))
+					);
+
+
+		float gx = (
+						DepthEdgeForUV(UV + float2(-PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * DepthEdgeForUV(UV + float2(-PostprocessInput1Size.z, 0)) +
+						DepthEdgeForUV(UV + float2(-PostprocessInput1Size.z, PostprocessInput1Size.w))
+					) -
+					(
+						DepthEdgeForUV(UV + float2(PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * DepthEdgeForUV(UV + float2(PostprocessInput1Size.z, 0)) +
+						DepthEdgeForUV(UV + float2(PostprocessInput1Size.z, PostprocessInput1Size.w))
+					);
+
+		return sqrt(gx * gx + gy * gy);
+	}
+
+	float CalculateNormalLine(float2 UV) {
+		float3 y_vec = (
+						NormalEdgeForUV(UV + float2(-PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * NormalEdgeForUV(UV + float2(0, -PostprocessInput1Size.w)) +
+						NormalEdgeForUV(UV + float2(PostprocessInput1Size.z, -PostprocessInput1Size.w))
+					) -
+					(
+						NormalEdgeForUV(UV + float2(-PostprocessInput1Size.z, PostprocessInput1Size.w)) +
+						2 * NormalEdgeForUV(UV + float2(0, PostprocessInput1Size.w)) +
+						NormalEdgeForUV(UV + float2(PostprocessInput1Size.z, PostprocessInput1Size.w))
+					);
+
+
+		float3 x_vec = (
+						NormalEdgeForUV(UV + float2(-PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * NormalEdgeForUV(UV + float2(-PostprocessInput1Size.z, 0)) +
+						NormalEdgeForUV(UV + float2(-PostprocessInput1Size.z, PostprocessInput1Size.w))
+					) -
+					(
+						NormalEdgeForUV(UV + float2(PostprocessInput1Size.z, -PostprocessInput1Size.w)) +
+						2 * NormalEdgeForUV(UV + float2(PostprocessInput1Size.z, 0)) +
+						NormalEdgeForUV(UV + float2(PostprocessInput1Size.z, +PostprocessInput1Size.w))
+					);
+
+		float gx = length(x_vec);
+		float gy = length (y_vec);
+
+		return sqrt(gx * gx + gy * gy);
+	}
 
 	void PPCartoonPS(
 		in noperspective float4 UVAndScreenPos: TEXCOORD0,
@@ -38,34 +105,45 @@ float EdgeForSide(float4 CurrentSample, float2 SampleUV) {
 	)
 	{
 		float2 UV = UVAndScreenPos.xy;
-
-		// FScreenSpaceData ScreenSpaceData = GetScreenSpaceData(UV, false);
-		// FGBufferData GBuffer = ScreenSpaceData.GBuffer;
-		float currentSample = Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, UV).r;
-
-		// Right pixel
-		float rightSample = EdgeForSide(currentSample, UV + float2(PostprocessInput1Size.z, 0));
-
-		// Left pixel
-		float leftSample = EdgeForSide(currentSample, UV + float2(-PostprocessInput1Size.z, 0));
-
-		// Top pixel
-		float topSample = EdgeForSide(currentSample, UV + float2(0, -PostprocessInput1Size.w));
-
-		// Bottom pixel
-		float bottomSample = EdgeForSide(currentSample, UV + float2(0, PostprocessInput1Size.w));
-
-		float rightEdge = currentSample - rightSample;
-		float leftEdge = currentSample - leftSample;
-		float topEdge = currentSample - topSample;
-		float bottomEdge = currentSample - bottomSample;
+		float4 SceneSample = Texture2DSample(PostprocessInput0, PostprocessInput0Sampler, UV);
+		float4 OutlineColor = float4(0, 0, 0, 1);
+		float CurrentDepth = Texture2DSample(PostprocessInput1, PostprocessInput1Sampler, UV).x;
 
 
-		OutColor = float4(rightEdge, rightEdge, rightEdge, 1) +
-				   float4(leftEdge, leftEdge, leftEdge, 1) +
-				   float4(topEdge, topEdge, topEdge, 1) +
-				   float4(bottomEdge, bottomEdge, bottomEdge, 1);
+		float DepthEdge = CalculateDepthLine(UV);
 
+		float NormalEdge = CalculateNormalLine(UV);
+
+		float Edge = max(DepthEdge, NormalEdge);
+
+		Edge = clamp(Edge, 0, 1);
+
+		float DistanceUnits = CurrentDepth / 1e+05;
+
+		// Cel Shading
+		float3 ycog = RGBToYCoCg(SceneSample.rgb);
+
+		float Luminance = ycog.x;
+
+		float NewLuminance = round(Luminance * 15) / 15;
+
+		ycog.x = NewLuminance;
+
+		float3 ConvertedColor = YCoCgToRGB(ycog);
+
+		float4 CelColor = float4(ConvertedColor, SceneSample.w);
+
+		if (DepthEdge > 0.5) {
+			OutColor = lerp(CelColor, OutlineColor, DepthEdge);
+			return;
+		}
+		else if (NormalEdge > 2.5) {
+			OutColor = lerp(CelColor, OutlineColor, NormalEdge);
+			return;
+		}
+		else {
+			OutColor = CelColor;
+		}
 	}
 
 #endif // PIXELSHADER
