@@ -1,0 +1,19 @@
+Ioannis Boutsikas VR51416
+
+The relevant files are:
+1) PostProcessing.cpp (https://github.com/Zinadore/g4g18/blob/release/Engine/Source/Runtime/Renderer/Private/PostProcess/PostProcessing.cpp#L1684)
+2) PostProcessCartoon.h (https://github.com/Zinadore/g4g18/blob/release/Engine/Source/Runtime/Renderer/Private/PostProcess/PostProcessCartoon.h)
+3) PostProcessCartoon.cpp (https://github.com/Zinadore/g4g18/blob/release/Engine/Source/Runtime/Renderer/Private/PostProcess/PostProcessCartoon.cpp)
+4) PostProcessCartoon.usf (https://github.com/Zinadore/g4g18/blob/release/Engine/Shaders/Private/PostProcessCartoon.usf)
+
+I tried to add the pass after TemporalAA had been applied, I am not really sure I succeded, since the effect is still noticable, but less so. The reason is that TAA will introduce some
+jittering to the lines, and make them appear as if they are oscilating back and forth.
+
+The command to enable/disable the pass is r.CartoonPass 1/0
+
+If for some reason it crashes when enabling the pass with an error saying that it expected some uniform to be bound, you need to rebuild the shaders, at least the modified ones.
+I have no idea why or if it is the expected behavior, but there you go.
+
+The normals on the farthest edge of the cube and the cylinder are not as defined as I would like when viewing them from above.
+
+Video URL: https://drive.google.com/open?id=1HJ2H7hLYqMK8RlyJDoqNPCWkl-_opY2P
