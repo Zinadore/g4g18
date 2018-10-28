@@ -1,7 +1,6 @@
 /*=============================================================================
 	PostProcessCartoon.cpp: Post processing cartoon effect implementation.
 =============================================================================*/
-#pragma optimize("", off)
 #include "PostProcess/PostProcessCartoon.h"
  #include "StaticBoundShaderState.h"
  #include "SceneUtils.h"

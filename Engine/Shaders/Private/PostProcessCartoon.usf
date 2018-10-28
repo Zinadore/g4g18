@@ -141,8 +141,11 @@ void PPCartoonVS(
 			OutColor = lerp(CelColor, OutlineColor, NormalEdge);
 			return;
 		}
-		else {
+		else if (DistanceUnits < 1) {
 			OutColor = CelColor;
+		}
+		else {
+			OutColor = SceneSample;
 		}
 	}
 
