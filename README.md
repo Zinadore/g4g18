@@ -1,3 +1,12 @@
+CMSC 691 - Graphics for Games Fall 2018
+=============
+This is a fork of UE4 used in UMBC's Graphics for Games class. There are 4 assignments implemented in this repository.
+
+* assn1: Basic Material and Blueprint usage
+* assn2: C++ Scripting, creating and using Actors without the use of blueprints
+* assn3: Create a new blueprint node, via a plugin
+* assn4: Create a custom Post Process effect. The effect includes cel shading, as well as cartoon like outlines through custom shaders. No blueprints used.
+
 Unreal Engine
 =============
 
